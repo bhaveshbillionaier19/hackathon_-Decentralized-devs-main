@@ -203,7 +203,10 @@ function App() {
   // Fetch current gas limit
   const fetchGasLimit = async () => {
     if (contract) {
+      
+      
       const limit = await contract.methods.currentGasLimit().call();
+      console.log(limit);
       setGasLimit(limit);
     }
   };

@@ -35,6 +35,41 @@
       "artifacts": [
         "NetworkManager"
       ]
+    },
+    "C:\\Users\\HP\\Desktop\\hackathon_-Decentralized-devs-main\\contracts\\NetworkManager.sol": {
+      "lastModificationDate": 1742639288460,
+      "contentHash": "ba52f12d73bc016d481a0b8fb011d05e",
+      "sourceName": "contracts/NetworkManager.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.18"
+      ],
+      "artifacts": [
+        "NetworkManager"
+      ]
     }
   }
 }
