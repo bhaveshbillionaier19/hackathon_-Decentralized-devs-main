@@ -1,5 +1,9 @@
+/* global BigInt */
+
+
 import React, { useState, useEffect } from "react";
 import Web3 from "web3";
+
 
 function App() {
   const [web3, setWeb3] = useState(null);
@@ -177,7 +181,7 @@ function App() {
   ]
   ;
 
-  const contractAddress = "0x0Eab42a7c6262B0be833Ed4C2dC0070faEa480EF"; // Replace with your contract address
+  const contractAddress = "0xe14bac79c6b465b3c201cbd4f86693ae24cac06c"; // Replace with your contract address
 
   // Connect to MetaMask
   const connectMetaMask = async () => {
@@ -202,24 +206,56 @@ function App() {
 
   // Fetch current gas limit
   const fetchGasLimit = async () => {
-    if (contract) {
+    try {
+      if (!contract) {
+        console.error("Contract is not initialized");
+        return;
+      }
       
+      console.log("Attempting to call currentGasLimit() on contract at:", contractAddress);
       
-      const limit = await contract.methods.currentGasLimit().call();
-      console.log(limit);
+      // Try a different way to call the function
+      const limit = await contract.methods.currentGasLimit().call({
+        from: account,
+        gas: 486600 // Explicitly set higher gas
+      });
+      
+      console.log("Current gas limit:", limit);
       setGasLimit(limit);
+    } catch (error) {
+      console.error("Error fetching gas limit:", error.message);
+      
+      // Detailed debugging
+      if (error.message.includes("Returned values aren't valid")) {
+        console.error("This could indicate the contract doesn't have the expected method or the ABI is incorrect");
+        
+        // List available methods
+        console.log("Available contract methods:", Object.keys(contract.methods));
+        
+        // Try checking if the contract has other expected methods
+        try {
+          const owner = await contract.methods.owner().call();
+          console.log("Contract owner:", owner);
+          alert("Contract exists but currentGasLimit method failed. Check console for details.");
+        } catch (secondError) {
+          console.error("Secondary method also failed:", secondError);
+          alert("Contract communication completely failed. You may be on the wrong network.");
+        }
+      }
     }
   };
+
 
   // Update gas limit
   const updateGasLimit = async () => {
     if (contract) {
-      const newLimit = gasLimit * 1.1; // Increase by 10%
+      const newLimit = BigInt(gasLimit) * BigInt(110) / BigInt(100);  // Increase by 10%
       await contract.methods.setGasLimit(newLimit).send({ from: account });
       alert("Gas limit updated successfully!");
-      fetchGasLimit(); // Refresh the displayed gas limit
+      fetchGasLimit();  // Refresh the displayed gas limit
     }
   };
+  
 
   // Fetch gas limit on component mount
   useEffect(() => {
