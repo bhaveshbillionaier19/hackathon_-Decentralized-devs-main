@@ -1,16 +1,21 @@
 # Autonomous Traffic Manager for Blockchain Networks
 
 ## 🚀 Overview
-The **Autonomous Traffic Manager** is an AI-powered system designed to optimize blockchain network performance by dynamically adjusting block gas limits, balancing node loads using eBPF, and filtering real-time traffic to prevent spam and DoS attacks.
+The **Autonomous Traffic Manager for Blockchain Networks** is a decentralized system that optimizes blockchain network performance using AI-driven gas price estimation and eBPF-based traffic filtering. The project dynamically adjusts block gas limits, prevents spam/DoS attacks, and efficiently distributes network traffic.
 
 ## 🏗 Tech Stack
 - **AI**: PyTorch, TensorFlow (Reinforcement Learning models)
 - **Blockchain**: Solidity, Hardhat, Ethereum
 - **eBPF**: bcc, libbpf, Cilium (for efficient traffic filtering & load balancing)
 - **Frontend**: React.js
-- **Backend**: Express.js (if needed)
+- **Backend**: Flask(API)
 
 ---
+### Key Features
+- **AI Agent**: Utilizes Reinforcement Learning (PyTorch/TensorFlow) to optimize gas price dynamically.
+- **Smart Contracts**: Implements `NetworkManager.sol` to manage network settings.
+- **eBPF Load Balancing**: Uses `bcc`, `libbpf`, and `Cilium` for efficient node distribution.
+- **Frontend (React.js)**: Web3-enabled UI for managing network parameters and viewing gas price estimates.
 
 ## 📂 Project Structure
 ```
@@ -52,6 +57,27 @@ The AI agent monitors and optimizes blockchain traffic using Reinforcement Learn
 
 ---
 
+## Usage
+### 1. Connect Wallet
+- Open the web app.
+- Click **Connect Wallet** to link MetaMask.
+
+### 2. View Gas Price Prediction
+- The AI agent continuously updates the optimal gas price.
+- View the estimated value on the dashboard.
+
+### 3. Adjust Network Parameters
+- Modify gas limits and transaction fees.
+- Submit changes via the smart contract.
+
+### 4. Monitor Traffic Filtering (eBPF)
+- Run the eBPF module:
+```bash
+cd eBPF
+sudo ./start_filtering.sh
+```
+- Monitor logs for blocked transactions.
+
 ## 🚀 Deployment
 ### 1️⃣ Smart Contract Deployment
 ```sh
@@ -64,8 +90,8 @@ npx hardhat deploy
 ```sh
 cd ai_agent/
 pip install -r requirements.txt
-python train.py  # Train the RL model
-python infer.py  # Run inference
+python train_model.py  # Train the RL model
+python ai_api.py  # Run inference
 ```
 
 ### 3️⃣ eBPF Activation
@@ -76,7 +102,6 @@ sudo ./setup_ebpf.sh
 
 ### 4️⃣ Frontend
 ```sh
-cd src/
 npm install
 npm start
 ```
