@@ -468,10 +468,10 @@ function App() {
       "type": "function"
     }
   ];
-<<<<<<< HEAD
-=======
+
+
   const contractAddress = "0x71e102A49e672B9cB1AfD1606368F470b2A4DDCA";
->>>>>>> eee054a2c2fd5944f75c8b180b894c7d05ebdcb2
+
 
   // Connect to MetaMask
   const connectMetaMask = async () => {
@@ -482,7 +482,7 @@ function App() {
         const accounts = await web3Instance.eth.getAccounts();
         setWeb3(web3Instance);
         setAccount(accounts[0]);
-<<<<<<< HEAD
+
 
         // Initialize both contracts
         const trafficManagerInstance = new web3Instance.eth.Contract(trafficManagerABI, trafficManagerAddress);
@@ -490,11 +490,11 @@ function App() {
         
         setTrafficManager(trafficManagerInstance);
         setNetworkManager(networkManagerInstance);
-=======
+
         // Initialize contract
         const contractInstance = new web3Instance.eth.Contract(contractABI, contractAddress);
         setContract(contractInstance);
->>>>>>> eee054a2c2fd5944f75c8b180b894c7d05ebdcb2
+
       } catch (error) {
         console.error("Error connecting to MetaMask:", error);
       }
@@ -726,13 +726,13 @@ function App() {
         throughput: 800 + Math.random() * 500   // 800-1300 TPS (more variance)
       };
       
-<<<<<<< HEAD
+
       let useBackupLogic = true;
-=======
+
       // Include connection timeout for more reliable API calls
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 5 second timeout
->>>>>>> eee054a2c2fd5944f75c8b180b894c7d05ebdcb2
+
       
       try {
         // Include connection timeout for more reliable API calls
@@ -1261,38 +1261,7 @@ function App() {
         )}
       </div>
 
-      <div className="mb-6 bg-gray-800 p-5 rounded-xl border border-gray-700 hover:border-cyan-800 transition-all hover:shadow-[0_0_15px_rgba(6,182,212,0.2)]">
-        <div className="flex flex-col md:flex-row items-center gap-4">
-          <div className="flex-1">
-            <p className="text-sm text-gray-400 mb-1">Current Gas Limit:</p>
-            <p className="text-lg font-semibold text-cyan-400">
-              {gasLimit ? web3.utils.fromWei(gasLimit, "gwei") + " Gwei" : "Loading..."}
-            </p>
-          </div>
-          <div className="flex-1">
-            <p className="text-sm text-gray-400 mb-1">Network Congestion:</p>
-            <p
-              className={`text-lg font-semibold ${
-                networkCongestion === "Low"
-                  ? "text-green-400"
-                  : networkCongestion === "Medium"
-                  ? "text-yellow-400"
-                  : "text-red-400"
-              }`}
-            >
-              {networkCongestion}
-            </p>
-          </div>
-          <div className="flex-1">
-            <p className="text-sm text-gray-400 mb-1">Maximum Limit:</p>
-            <p className="text-lg font-semibold text-purple-400">
-              {maxGasLimit ? web3.utils.fromWei(maxGasLimit, "gwei") + " Gwei" : "Loading..."}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-gray-800 p-5 rounded-xl border border-gray-700 hover:border-cyan-800 transition-all hover:shadow-[0_0_15px_rgba(6,182,212,0.2)] mb-6">
+      <div className="mb-6 bg-gray-800 p-5 rounded-xl border border-gray-700 hover:border-cyan-800 transition-all hover:shadow-[0_0_15px_rgba(6,182,212,0.2)] mb-6">
         <h3 className="text-lg font-semibold mb-4 text-cyan-400">AI Gas Limit Optimization</h3>
         <div className="grid grid-cols-1 gap-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
@@ -1322,7 +1291,7 @@ function App() {
         </div>
       </div>
       
-<<<<<<< HEAD
+
       <div className="mt-6 bg-gray-700 p-4 rounded-lg">
         <h3 className="text-lg font-semibold mb-4">Network Parameters</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1403,69 +1372,6 @@ function App() {
               placeholder="e.g., swap, transfer, mint"
               onChange={(e) => setTxType(e.target.value)}
             />
-=======
-      <div className="bg-gray-800 p-5 rounded-xl border border-gray-700 hover:border-purple-800 transition-all hover:shadow-[0_0_15px_rgba(168,85,247,0.2)]">
-        <h3 className="text-lg font-semibold mb-4 text-purple-400">eBPF Traffic Control Rules</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-gray-900 bg-opacity-70 p-4 rounded-lg border border-gray-700 hover:border-cyan-900 transition-all group">
-            <p className="text-gray-300 mb-2 group-hover:text-cyan-400 transition-colors">Transaction Batching</p>
-            <div className="flex items-center space-x-4">
-              <div>
-                <p className="text-sm">Batch threshold: 
-                  <span className="text-cyan-400 font-bold ml-2">{ebpfRules.batch_threshold}</span>
-                </p>
-                <p className="text-sm mt-1">Max TX per sender: 
-                  <span className="text-cyan-400 font-bold ml-2">{ebpfRules.max_txs_per_sender}</span>
-                </p>
-              </div>
-              <div className="w-12 h-12 flex-shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-full h-full text-cyan-500 opacity-70 group-hover:opacity-100 transition-opacity">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-              </div>
-            </div>
-          </div>
-          <div className="bg-gray-900 bg-opacity-70 p-4 rounded-lg border border-gray-700 hover:border-purple-900 transition-all group">
-            <p className="text-gray-300 mb-2 group-hover:text-purple-400 transition-colors">Priority Accounts</p>
-            {ebpfRules.priority_accounts.length > 0 ? (
-              <ul className="list-disc list-inside space-y-1">
-                {ebpfRules.priority_accounts.map((acct, idx) => (
-                  <li key={idx} className="text-xs group-hover:text-purple-300 transition-colors">
-                    <span className="font-mono">{acct.address.substring(0, 10)}...</span> - {acct.description}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="flex items-center space-x-2">
-                <p className="text-sm text-gray-400">No priority accounts configured</p>
-                <div className="w-8 h-8 flex-shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-full h-full text-purple-500 opacity-70 group-hover:opacity-100 transition-opacity">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-        
-        <div className="mt-4">
-          <p className="text-gray-300 mb-2 hover:text-red-400 transition-colors">Dropped Transaction Patterns</p>
-          <div className="bg-gray-900 bg-opacity-70 p-4 rounded-lg border border-gray-700 hover:border-red-900 transition-all">
-            {ebpfRules.drop_patterns.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {ebpfRules.drop_patterns.map((pattern, idx) => (
-                  <div key={idx} className="bg-gradient-to-r from-red-900/40 to-red-900/10 p-3 rounded-lg text-xs border border-red-900/50 hover:border-red-700 hover:shadow-[0_0_10px_rgba(239,68,68,0.2)] transition-all group">
-                    <span className="font-mono text-red-400 group-hover:text-red-300 transition-colors">{pattern.pattern}</span>
-                    <p className="text-gray-400 mt-1 group-hover:text-gray-300 transition-colors">{pattern.description}</p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex justify-center items-center h-20">
-                <p className="text-sm text-gray-400">No transaction dropping rules active</p>
-              </div>
-            )}
->>>>>>> eee054a2c2fd5944f75c8b180b894c7d05ebdcb2
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-400">Space Allocation (%)</label>
@@ -1714,16 +1620,13 @@ function App() {
   return (
     <div className="bg-gradient-to-r from-gray-900 to-black text-white min-h-screen p-4 font-sans">
       <header className="container mx-auto flex flex-col md:flex-row justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]">Autonomous Traffic Manager</h1>
+        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]">
+          Autonomous Traffic Manager
+        </h1>
         {web3 ? (
           <div className="flex items-center gap-2 text-sm">
-<<<<<<< HEAD
-            <div className="bg-green-800 px-3 py-1 rounded-full text-white border border-white">
-              Contract Address: {trafficManagerAddress.substring(0, 6)}...{trafficManagerAddress.substring(38)}
-=======
             <div className="bg-gray-900 px-4 py-2 rounded-full text-cyan-400 border border-cyan-700 shadow-[0_0_10px_rgba(6,182,212,0.3)] hover:shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all">
               Contract Address: {contractAddress}
->>>>>>> eee054a2c2fd5944f75c8b180b894c7d05ebdcb2
             </div>
             <div className="bg-gray-900 px-4 py-2 rounded-full text-purple-400 border border-purple-700 shadow-[0_0_10px_rgba(168,85,247,0.3)] hover:shadow-[0_0_15px_rgba(168,85,247,0.5)] transition-all">
               Connected: {account}
