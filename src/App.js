@@ -217,7 +217,7 @@ function App() {
       type: "function",
     },
   ];
-  const contractAddress = "0xe14bac79c6b465b3c201cbd4f86693ae24cac06c";
+  const contractAddress = "0x71e102A49e672B9cB1AfD1606368F470b2A4DDCA";
 
   // Connect to MetaMask
   const connectMetaMask = async () => {
@@ -228,7 +228,6 @@ function App() {
         const accounts = await web3Instance.eth.getAccounts();
         setWeb3(web3Instance);
         setAccount(accounts[0]);
-
         // Initialize contract
         const contractInstance = new web3Instance.eth.Contract(contractABI, contractAddress);
         setContract(contractInstance);
@@ -401,7 +400,7 @@ function App() {
       
       // Include connection timeout for more reliable API calls
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 5 second timeout
       
       try {
         const response = await fetch("http://127.0.0.1:5000/predict_gas", {
@@ -628,15 +627,15 @@ function App() {
   // Render dashboard tab
   const renderDashboard = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div className="bg-gray-800 p-4 rounded-lg shadow">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Network Status</h2>
+      <div className="bg-gray-900 bg-opacity-80 p-5 rounded-xl shadow-[0_0_15px_rgba(0,0,0,0.4)] border border-gray-800 backdrop-blur-sm hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] transition-all duration-300">
+        <div className="flex justify-between items-center mb-5">
+          <h2 className="text-xl font-bold text-cyan-400">Network Status</h2>
           {lastUpdated && (
             <div className="text-xs text-gray-400 flex items-center">
               <span>Updated: {lastUpdated.toLocaleTimeString()}</span>
               <button 
                 onClick={fetchGasLimit} 
-                className="ml-2 p-1 rounded hover:bg-gray-700 transition-colors"
+                className="ml-2 p-1 rounded hover:bg-gray-700 hover:text-cyan-400 transition-all"
                 title="Refresh data">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -646,164 +645,171 @@ function App() {
           )}
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <div className="bg-gray-700 p-3 rounded-lg">
-            <p className="text-gray-400">Congestion</p>
+          <div className="bg-gray-800 p-4 rounded-xl border border-gray-700 hover:border-cyan-800 transition-all group">
+            <p className="text-gray-400 group-hover:text-gray-300 transition-colors">Congestion</p>
             <p
               className={`text-xl font-bold ${
                 networkCongestion === "Low"
-                  ? "text-green-400"
+                  ? "text-green-400 group-hover:text-green-300"
                   : networkCongestion === "Medium"
-                  ? "text-yellow-400"
-                  : "text-red-400"
-              }`}
+                  ? "text-yellow-400 group-hover:text-yellow-300"
+                  : "text-red-400 group-hover:text-red-300"
+              } transition-colors`}
             >
               {networkCongestion}
             </p>
           </div>
-          <div className="bg-gray-700 p-3 rounded-lg">
-            <p className="text-gray-400">Block Utilization</p>
-            <p className="text-xl font-bold">{blockUtilization}%</p>
+          <div className="bg-gray-800 p-4 rounded-xl border border-gray-700 hover:border-cyan-800 transition-all group">
+            <p className="text-gray-400 group-hover:text-gray-300 transition-colors">Block Utilization</p>
+            <p className="text-xl font-bold text-purple-400 group-hover:text-purple-300 transition-colors">{blockUtilization}%</p>
           </div>
-          <div className="bg-gray-700 p-3 rounded-lg">
-            <p className="text-gray-400">Current Gas Limit</p>
-            <p className="text-xl font-bold">
+          <div className="bg-gray-800 p-4 rounded-xl border border-gray-700 hover:border-cyan-800 transition-all group">
+            <p className="text-gray-400 group-hover:text-gray-300 transition-colors">Current Gas Limit</p>
+            <p className="text-xl font-bold text-cyan-400 group-hover:text-cyan-300 transition-colors">
               {gasLimit ? web3.utils.fromWei(gasLimit, "gwei") + " Gwei" : "Loading..."}
             </p>
           </div>
-          <div className="bg-gray-700 p-3 rounded-lg">
-            <p className="text-gray-400">Transactions/Sec</p>
-            <p className="text-xl font-bold">{tps}</p>
+          <div className="bg-gray-800 p-4 rounded-xl border border-gray-700 hover:border-cyan-800 transition-all group">
+            <p className="text-gray-400 group-hover:text-gray-300 transition-colors">Transactions/Sec</p>
+            <p className="text-xl font-bold text-cyan-400 group-hover:text-cyan-300 transition-colors">{tps}</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-gray-800 p-4 rounded-lg shadow">
-        <h2 className="text-xl font-bold mb-4">Gas Fee Recommendations</h2>
-        <div className="space-y-3">
-          <div className="flex justify-between items-center bg-green-900 bg-opacity-20 p-2 rounded border border-green-700">
-            <div>
+      <div className="bg-gray-900 bg-opacity-80 p-5 rounded-xl shadow-[0_0_15px_rgba(0,0,0,0.4)] border border-gray-800 backdrop-blur-sm hover:shadow-[0_0_20px_rgba(168,85,247,0.2)] transition-all duration-300">
+        <h2 className="text-xl font-bold text-purple-400 mb-5">Gas Fee Recommendations</h2>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center bg-gradient-to-r from-green-900 to-green-900/30 bg-opacity-20 p-3 rounded-lg border border-green-900 hover:border-green-700 transition-all group">
+            <div className="group-hover:translate-x-1 transition-transform">
               <span className="text-green-400 font-medium">Slow</span>
-              <p className="text-xs text-gray-400">{gasFeeEstimates.slow.time}</p>
+              <p className="text-xs text-gray-400 group-hover:text-gray-300 transition-colors">{gasFeeEstimates.slow.time}</p>
             </div>
-            <span className="font-bold">{gasFeeEstimates.slow.fee} Gwei</span>
+            <span className="font-bold text-green-400 group-hover:text-green-300 transition-colors">{gasFeeEstimates.slow.fee} Gwei</span>
           </div>
-          <div className="flex justify-between items-center bg-yellow-900 bg-opacity-20 p-2 rounded border border-yellow-700">
-            <div>
+          <div className="flex justify-between items-center bg-gradient-to-r from-yellow-900 to-yellow-900/30 bg-opacity-20 p-3 rounded-lg border border-yellow-900 hover:border-yellow-700 transition-all group">
+            <div className="group-hover:translate-x-1 transition-transform">
               <span className="text-yellow-400 font-medium">Medium</span>
-              <p className="text-xs text-gray-400">{gasFeeEstimates.medium.time}</p>
+              <p className="text-xs text-gray-400 group-hover:text-gray-300 transition-colors">{gasFeeEstimates.medium.time}</p>
             </div>
-            <span className="font-bold">{gasFeeEstimates.medium.fee} Gwei</span>
+            <span className="font-bold text-yellow-400 group-hover:text-yellow-300 transition-colors">{gasFeeEstimates.medium.fee} Gwei</span>
           </div>
-          <div className="flex justify-between items-center bg-red-900 bg-opacity-20 p-2 rounded border border-red-700">
-            <div>
+          <div className="flex justify-between items-center bg-gradient-to-r from-red-900 to-red-900/30 bg-opacity-20 p-3 rounded-lg border border-red-900 hover:border-red-700 transition-all group">
+            <div className="group-hover:translate-x-1 transition-transform">
               <span className="text-red-400 font-medium">Fast</span>
-              <p className="text-xs text-gray-400">{gasFeeEstimates.fast.time}</p>
+              <p className="text-xs text-gray-400 group-hover:text-gray-300 transition-colors">{gasFeeEstimates.fast.time}</p>
             </div>
-            <span className="font-bold">{gasFeeEstimates.fast.fee} Gwei</span>
+            <span className="font-bold text-red-400 group-hover:text-red-300 transition-colors">{gasFeeEstimates.fast.fee} Gwei</span>
           </div>
         </div>
       </div>
 
-      <div className="bg-gray-800 p-4 rounded-lg shadow">
-        <h2 className="text-xl font-bold mb-4">Block Information</h2>
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <span className="text-gray-400">Latest Block:</span>
-            <span>{currentBlock ? currentBlock.number : "Loading..."}</span>
+      <div className="bg-gray-900 bg-opacity-80 p-5 rounded-xl shadow-[0_0_15px_rgba(0,0,0,0.4)] border border-gray-800 backdrop-blur-sm hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] transition-all duration-300">
+        <h2 className="text-xl font-bold text-cyan-400 mb-5">Block Information</h2>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center p-3 border-b border-gray-700 hover:border-cyan-900 group transition-colors">
+            <span className="text-gray-400 group-hover:text-gray-300 transition-colors">Latest Block:</span>
+            <span className="text-cyan-400 group-hover:text-cyan-300 font-mono transition-colors">{currentBlock ? currentBlock.number : "Loading..."}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-400">Block Gas Used:</span>
-            <span>{currentBlock ? currentBlock.gasUsed : "Loading..."}</span>
+          <div className="flex justify-between items-center p-3 border-b border-gray-700 hover:border-cyan-900 group transition-colors">
+            <span className="text-gray-400 group-hover:text-gray-300 transition-colors">Block Gas Used:</span>
+            <span className="text-cyan-400 group-hover:text-cyan-300 font-mono transition-colors">{currentBlock ? currentBlock.gasUsed : "Loading..."}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-400">Pending Transactions:</span>
-            <span>{pendingTxCount}</span>
+          <div className="flex justify-between items-center p-3 border-b border-gray-700 hover:border-cyan-900 group transition-colors">
+            <span className="text-gray-400 group-hover:text-gray-300 transition-colors">Pending Transactions:</span>
+            <span className="text-cyan-400 group-hover:text-cyan-300 font-mono transition-colors">{pendingTxCount}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-400">Registered Nodes:</span>
-            <span>{registeredNodes.length}</span>
+          <div className="flex justify-between items-center p-3 border-b border-gray-700 hover:border-cyan-900 group transition-colors">
+            <span className="text-gray-400 group-hover:text-gray-300 transition-colors">Registered Nodes:</span>
+            <span className="text-cyan-400 group-hover:text-cyan-300 font-mono transition-colors">{registeredNodes.length}</span>
           </div>
         </div>
       </div>
 
-      <div className="bg-gray-800 p-4 rounded-lg shadow">
-        <h2 className="text-xl font-bold mb-4 flex items-center">
+      <div className="bg-gray-900 bg-opacity-80 p-5 rounded-xl shadow-[0_0_15px_rgba(0,0,0,0.4)] border border-gray-800 backdrop-blur-sm hover:shadow-[0_0_20px_rgba(168,85,247,0.2)] transition-all duration-300">
+        <h2 className="text-xl font-bold text-purple-400 mb-5 flex items-center">
           MEV Monitor
           {mevAlerts.length > 0 && (
-            <span className="ml-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full">
+            <span className="ml-2 bg-gradient-to-r from-red-600 to-purple-600 text-white text-xs px-2 py-1 rounded-full">
               {mevAlerts.length}
             </span>
           )}
         </h2>
         <div className="max-h-40 overflow-y-auto">
           {mevAlerts.length > 0 ? (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {mevAlerts.map((alert, idx) => (
                 <div
                   key={idx}
-                  className="bg-red-900 bg-opacity-20 p-2 rounded border border-red-700 text-xs"
+                  className="bg-gradient-to-r from-red-900/50 to-purple-900/30 p-3 rounded-lg border border-red-800 hover:border-red-700 hover:shadow-[0_0_10px_rgba(239,68,68,0.2)] transition-all text-xs group"
                 >
-                  <div className="flex justify-between">
-                    <span>From:</span>
-                    <span className="font-mono">{alert.from.substring(0, 8)}...</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400 group-hover:text-gray-300 transition-colors">From:</span>
+                    <span className="font-mono text-red-400 group-hover:text-red-300 transition-colors">{alert.from.substring(0, 8)}...</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>To:</span>
-                    <span className="font-mono">{alert.to.substring(0, 8)}...</span>
+                  <div className="flex justify-between items-center mt-1">
+                    <span className="text-gray-400 group-hover:text-gray-300 transition-colors">To:</span>
+                    <span className="font-mono text-red-400 group-hover:text-red-300 transition-colors">{alert.to.substring(0, 8)}...</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Gas Price:</span>
-                    <span>{alert.gasPrice} Gwei</span>
+                  <div className="flex justify-between items-center mt-1">
+                    <span className="text-gray-400 group-hover:text-gray-300 transition-colors">Gas Price:</span>
+                    <span className="font-mono text-red-400 group-hover:text-red-300 transition-colors">{alert.gasPrice} Gwei</span>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-gray-400 text-center">No MEV activity detected</p>
+            <div className="flex items-center justify-center h-32 bg-gray-800 bg-opacity-50 rounded-lg border border-gray-700">
+              <p className="text-gray-400">No MEV activity detected</p>
+            </div>
           )}
         </div>
       </div>
 
-      <div className="col-span-1 md:col-span-2 bg-gray-800 p-4 rounded-lg shadow">
-        <h2 className="text-xl font-bold mb-4">Gas Limit Trends</h2>
+      <div className="col-span-1 md:col-span-2 bg-gray-900 bg-opacity-80 p-5 rounded-xl shadow-[0_0_15px_rgba(0,0,0,0.4)] border border-gray-800 backdrop-blur-sm hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] transition-all duration-300">
+        <h2 className="text-xl font-bold text-cyan-400 mb-5">Gas Limit Trends</h2>
         <div className="h-64">
           {gasHistory.length > 0 && <Line data={chartData} options={chartOptions} />}
         </div>
       </div>
       
       {/* New: AI Optimization Recommendations */}
-      <div className="col-span-1 md:col-span-2 bg-gray-800 p-4 rounded-lg shadow">
-        <h2 className="text-xl font-bold mb-4">AI Optimization Recommendations</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <div className="bg-gray-700 p-3 rounded-lg">
-            <p className="text-gray-400">Optimal P2P Connections</p>
-            <p className="text-xl font-bold">{optimalPeerConnections}</p>
-            <p className="text-xs text-gray-400 mt-1">Recommended number of peers based on network load</p>
+      <div className="col-span-1 md:col-span-2 bg-gray-900 bg-opacity-80 p-5 rounded-xl shadow-[0_0_15px_rgba(0,0,0,0.4)] border border-gray-800 backdrop-blur-sm hover:shadow-[0_0_20px_rgba(168,85,247,0.2)] transition-all duration-300">
+        <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 mb-5">AI Optimization Recommendations</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+          <div className="bg-gray-800 p-4 rounded-xl border border-gray-700 hover:border-cyan-900 hover:shadow-[0_0_10px_rgba(6,182,212,0.2)] transition-all group">
+            <p className="text-gray-400 mb-2 group-hover:text-gray-300 transition-colors">Optimal P2P Connections</p>
+            <p className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">{optimalPeerConnections}</p>
+            <p className="text-xs text-gray-400 mt-1 group-hover:text-gray-300 transition-colors">Recommended number of peers based on network load</p>
           </div>
-          <div className="bg-gray-700 p-3 rounded-lg">
-            <p className="text-gray-400">Block Size Adjustment</p>
-            <p className={`text-xl font-bold ${blockSizeAdjustment >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+          <div className="bg-gray-800 p-4 rounded-xl border border-gray-700 hover:border-cyan-900 hover:shadow-[0_0_10px_rgba(6,182,212,0.2)] transition-all group">
+            <p className="text-gray-400 mb-2 group-hover:text-gray-300 transition-colors">Block Size Adjustment</p>
+            <p className={`text-2xl font-bold ${blockSizeAdjustment >= 0 ? 'text-green-400 group-hover:text-green-300' : 'text-red-400 group-hover:text-red-300'} transition-colors`}>
               {blockSizeAdjustment >= 0 ? '+' : ''}{blockSizeAdjustment}%
             </p>
-            <p className="text-xs text-gray-400 mt-1">Recommended block size adjustment</p>
+            <p className="text-xs text-gray-400 mt-1 group-hover:text-gray-300 transition-colors">Recommended block size adjustment</p>
           </div>
-          <div className="bg-gray-700 p-3 rounded-lg">
-            <p className="text-gray-400">Batch Transactions</p>
-            <p className="text-xl font-bold">{ebpfRules.batch_threshold}</p>
-            <p className="text-xs text-gray-400 mt-1">Transactions to batch for optimization</p>
+          <div className="bg-gray-800 p-4 rounded-xl border border-gray-700 hover:border-cyan-900 hover:shadow-[0_0_10px_rgba(6,182,212,0.2)] transition-all group">
+            <p className="text-gray-400 mb-2 group-hover:text-gray-300 transition-colors">Batch Transactions</p>
+            <p className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">{ebpfRules.batch_threshold}</p>
+            <p className="text-xs text-gray-400 mt-1 group-hover:text-gray-300 transition-colors">Transactions to batch for optimization</p>
           </div>
         </div>
         
-        <div className="bg-gray-700 p-4 rounded-lg">
-          <h3 className="font-semibold mb-2">Recommendations:</h3>
+        <div className="bg-gray-800 p-5 rounded-xl border border-gray-700 hover:border-purple-900 hover:shadow-[0_0_15px_rgba(168,85,247,0.2)] transition-all">
+          <h3 className="font-semibold mb-3 text-purple-400">Recommendations:</h3>
           {recommendations.length > 0 ? (
-            <ul className="list-disc list-inside space-y-1">
+            <ul className="space-y-2">
               {recommendations.map((rec, idx) => (
-                <li key={idx} className="text-gray-200">{rec}</li>
+                <li key={idx} className="text-gray-300 flex items-start">
+                  <span className="text-purple-500 mr-2">■</span>
+                  <span className="text-gray-300">{rec}</span>
+                </li>
               ))}
             </ul>
           ) : (
-            <p className="text-gray-400">No recommendations available</p>
+            <div className="flex items-center justify-center h-20 bg-gray-900 bg-opacity-50 rounded-lg">
+              <p className="text-gray-400">No recommendations available</p>
+            </div>
           )}
         </div>
       </div>
@@ -812,22 +818,22 @@ function App() {
 
   // Render gas management tab
   const renderGasManagement = () => (
-    <div className="bg-gray-800 p-6 rounded-lg shadow">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Gas Limit Management</h2>
+    <div className="bg-gray-900 bg-opacity-80 p-6 rounded-xl shadow-[0_0_15px_rgba(0,0,0,0.4)] border border-gray-800 backdrop-blur-sm">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500">Gas Limit Management</h2>
         {lastUpdated && (
           <div className="text-xs text-gray-400 flex items-center">
-            <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+            <div className="w-2 h-2 bg-cyan-500 rounded-full mr-2 animate-pulse shadow-[0_0_5px_rgba(6,182,212,0.5)]"></div>
             Auto-updating every 30s • Last update: {lastUpdated.toLocaleTimeString()}
           </div>
         )}
       </div>
 
-      <div className="mb-6 bg-gray-700 p-4 rounded-lg">
+      <div className="mb-6 bg-gray-800 p-5 rounded-xl border border-gray-700 hover:border-cyan-800 transition-all hover:shadow-[0_0_15px_rgba(6,182,212,0.2)]">
         <div className="flex flex-col md:flex-row items-center gap-4">
           <div className="flex-1">
             <p className="text-sm text-gray-400 mb-1">Current Gas Limit:</p>
-            <p className="text-lg font-semibold">
+            <p className="text-lg font-semibold text-cyan-400">
               {gasLimit ? web3.utils.fromWei(gasLimit, "gwei") + " Gwei" : "Loading..."}
             </p>
           </div>
@@ -847,85 +853,103 @@ function App() {
           </div>
           <div className="flex-1">
             <p className="text-sm text-gray-400 mb-1">Maximum Limit:</p>
-            <p className="text-lg font-semibold">
+            <p className="text-lg font-semibold text-purple-400">
               {maxGasLimit ? web3.utils.fromWei(maxGasLimit, "gwei") + " Gwei" : "Loading..."}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="bg-gray-700 p-4 rounded-lg">
-        <h3 className="text-lg font-semibold mb-2">AI Gas Limit Optimization</h3>
+      <div className="bg-gray-800 p-5 rounded-xl border border-gray-700 hover:border-cyan-800 transition-all hover:shadow-[0_0_15px_rgba(6,182,212,0.2)] mb-6">
+        <h3 className="text-lg font-semibold mb-4 text-cyan-400">AI Gas Limit Optimization</h3>
         <div className="grid grid-cols-1 gap-4">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col md:flex-row justify-between items-center">
             <div>
-              <p className="text-xl text-gray-100 font-bold mb-1 flex gap-2 items-center">
-                <span>Recommended Gas Limit:</span> 
-                <span className="font-bold bg-gray-900 px-3 py-1 rounded-lg border border-green-700 text-green-400 flex items-center">
+              <p className="text-xl text-gray-100 font-bold mb-2 flex items-center flex-wrap">
+                <span className="mr-2">Recommended Gas Limit:</span> 
+                <span className="font-bold bg-gray-900 px-4 py-2 rounded-lg border border-cyan-700 text-cyan-400 flex items-center shadow-[0_0_10px_rgba(6,182,212,0.3)] hover:shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all">
                   {newGasLimit}
-                  <div className="w-2 h-2 bg-green-500 rounded-full ml-2 animate-pulse"></div>
+                  <div className="w-2 h-2 bg-cyan-500 rounded-full ml-2 animate-pulse"></div>
                 </span>
               </p>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-gray-400 mt-1 max-w-lg">
                 This gas limit is dynamically computed by AI based on current network conditions
               </p>
             </div>
-            <div className="flex gap-3">
-              {/* <button
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors disabled:opacity-50"
-                onClick={fetchGasLimit}
-                disabled={isLoading}>
-                {isLoading ? 'Predicting...' : 'Predict Gas Limit'}
-              </button> */}
-              
+            <div className="flex gap-3 mt-4 md:mt-0">              
               <button
-                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors disabled:opacity-50"
+                className="bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white font-bold py-2 px-6 rounded-lg shadow-[0_0_10px_rgba(6,182,212,0.3)] hover:shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all disabled:opacity-50 disabled:hover:shadow-none"
                 onClick={updateGasLimit}
                 disabled={!newGasLimit || isLoading}>
-                Apply Gas Limit
+                {isLoading ? 
+                  <span className="flex items-center"><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>Applying...</span> : 
+                  'Apply Gas Limit'}
               </button>
             </div>
           </div>
         </div>
       </div>
       
-      <div className="mt-6 bg-gray-700 p-4 rounded-lg">
-        <h3 className="text-lg font-semibold mb-2">eBPF Traffic Control Rules</h3>
+      <div className="bg-gray-800 p-5 rounded-xl border border-gray-700 hover:border-purple-800 transition-all hover:shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+        <h3 className="text-lg font-semibold mb-4 text-purple-400">eBPF Traffic Control Rules</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-gray-800 p-3 rounded-lg">
-            <p className="text-gray-400 mb-2">Transaction Batching</p>
-            <p className="text-base">Batch similar transactions: <span className="text-white font-bold">{ebpfRules.batch_threshold}</span></p>
-            <p className="text-base">Max TX per sender: <span className="text-white font-bold">{ebpfRules.max_txs_per_sender}</span></p>
+          <div className="bg-gray-900 bg-opacity-70 p-4 rounded-lg border border-gray-700 hover:border-cyan-900 transition-all group">
+            <p className="text-gray-300 mb-2 group-hover:text-cyan-400 transition-colors">Transaction Batching</p>
+            <div className="flex items-center space-x-4">
+              <div>
+                <p className="text-sm">Batch threshold: 
+                  <span className="text-cyan-400 font-bold ml-2">{ebpfRules.batch_threshold}</span>
+                </p>
+                <p className="text-sm mt-1">Max TX per sender: 
+                  <span className="text-cyan-400 font-bold ml-2">{ebpfRules.max_txs_per_sender}</span>
+                </p>
+              </div>
+              <div className="w-12 h-12 flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-full h-full text-cyan-500 opacity-70 group-hover:opacity-100 transition-opacity">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+            </div>
           </div>
-          <div className="bg-gray-800 p-3 rounded-lg">
-            <p className="text-gray-400 mb-2">Priority Accounts</p>
+          <div className="bg-gray-900 bg-opacity-70 p-4 rounded-lg border border-gray-700 hover:border-purple-900 transition-all group">
+            <p className="text-gray-300 mb-2 group-hover:text-purple-400 transition-colors">Priority Accounts</p>
             {ebpfRules.priority_accounts.length > 0 ? (
-              <ul className="list-disc list-inside">
+              <ul className="list-disc list-inside space-y-1">
                 {ebpfRules.priority_accounts.map((acct, idx) => (
-                  <li key={idx} className="text-xs">
+                  <li key={idx} className="text-xs group-hover:text-purple-300 transition-colors">
                     <span className="font-mono">{acct.address.substring(0, 10)}...</span> - {acct.description}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-sm">No priority accounts configured</p>
+              <div className="flex items-center space-x-2">
+                <p className="text-sm text-gray-400">No priority accounts configured</p>
+                <div className="w-8 h-8 flex-shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-full h-full text-purple-500 opacity-70 group-hover:opacity-100 transition-opacity">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                </div>
+              </div>
             )}
           </div>
         </div>
         
         <div className="mt-4">
-          <p className="text-gray-400 mb-1">Dropped Transaction Patterns</p>
-          <div className="bg-gray-800 p-3 rounded-lg">
+          <p className="text-gray-300 mb-2 hover:text-red-400 transition-colors">Dropped Transaction Patterns</p>
+          <div className="bg-gray-900 bg-opacity-70 p-4 rounded-lg border border-gray-700 hover:border-red-900 transition-all">
             {ebpfRules.drop_patterns.length > 0 ? (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {ebpfRules.drop_patterns.map((pattern, idx) => (
-                  <div key={idx} className="bg-red-900 bg-opacity-20 p-1 rounded text-xs">
-                    <span className="font-mono">{pattern.pattern}</span> - {pattern.description}
+                  <div key={idx} className="bg-gradient-to-r from-red-900/40 to-red-900/10 p-3 rounded-lg text-xs border border-red-900/50 hover:border-red-700 hover:shadow-[0_0_10px_rgba(239,68,68,0.2)] transition-all group">
+                    <span className="font-mono text-red-400 group-hover:text-red-300 transition-colors">{pattern.pattern}</span>
+                    <p className="text-gray-400 mt-1 group-hover:text-gray-300 transition-colors">{pattern.description}</p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-sm">No transaction dropping rules active</p>
+              <div className="flex justify-center items-center h-20">
+                <p className="text-sm text-gray-400">No transaction dropping rules active</p>
+              </div>
             )}
           </div>
         </div>
@@ -935,105 +959,113 @@ function App() {
 
   // Render node management tab
   const renderNodeManagement = () => (
-    <div className="bg-gray-800 p-6 rounded-lg shadow">
-      <h2 className="text-xl font-bold mb-4">Node Management</h2>
+    <div className="bg-gray-900 bg-opacity-80 p-6 rounded-xl shadow-[0_0_15px_rgba(0,0,0,0.4)] border border-gray-800 backdrop-blur-sm">
+      <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 mb-6">Node Management</h2>
 
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold mb-2">Register New Node</h3>
-        <div className="flex flex-col md:flex-row items-center gap-3">
-          <div className="flex-1">
+      <div className="mb-6 bg-gray-800 p-5 rounded-xl border border-gray-700 hover:border-cyan-800 transition-all hover:shadow-[0_0_15px_rgba(6,182,212,0.2)]">
+        <h3 className="text-lg font-semibold mb-4 text-cyan-400">Register New Node</h3>
+        <div className="flex flex-col md:flex-row items-center gap-4">
+          <div className="flex-1 w-full">
             <input
               type="text"
               placeholder="Node Address (0x...)"
-              className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white"
+              className="w-full bg-gray-900 border border-gray-700 focus:border-cyan-700 rounded-lg p-3 text-white focus:outline-none focus:ring-1 focus:ring-cyan-500 transition-all"
               value={newNodeAddress}
               onChange={(e) => setNewNodeAddress(e.target.value)}
             />
           </div>
           <button
-            className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors"
+            className="bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white font-bold py-2 px-6 rounded-lg shadow-[0_0_10px_rgba(6,182,212,0.3)] hover:shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all"
             onClick={registerNode}
           >
             Register Node
           </button>
         </div>
-        <p className="text-xs text-gray-400 mt-2">
+        <p className="text-xs text-gray-400 mt-3">
           Registered nodes participate in traffic management and consensus on the network.
         </p>
       </div>
       
-      <div className="mb-6 bg-gray-700 p-4 rounded-lg">
-        <h3 className="text-lg font-semibold mb-3">Node Performance Metrics</h3>
+      <div className="mb-6 bg-gray-800 p-5 rounded-xl border border-gray-700 hover:border-purple-800 transition-all hover:shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+        <h3 className="text-lg font-semibold mb-4 text-purple-400">Node Performance Metrics</h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-gray-800 p-3 rounded-lg">
-            <p className="text-gray-400">Latency</p>
-            <p className="text-xl font-bold">500 ms</p>
+          <div className="bg-gray-900 bg-opacity-70 p-4 rounded-lg border border-gray-700 hover:border-cyan-900 transition-all group">
+            <p className="text-gray-400 group-hover:text-gray-300 transition-colors">Latency</p>
+            <p className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent group-hover:translate-y-[-2px] transition-transform">500 ms</p>
           </div>
-          <div className="bg-gray-800 p-3 rounded-lg">
-            <p className="text-gray-400">Uptime</p>
-            <p className="text-xl font-bold">98.5%</p>
+          <div className="bg-gray-900 bg-opacity-70 p-4 rounded-lg border border-gray-700 hover:border-green-900 transition-all group">
+            <p className="text-gray-400 group-hover:text-gray-300 transition-colors">Uptime</p>
+            <p className="text-xl font-bold text-green-400 group-hover:text-green-300 group-hover:translate-y-[-2px] transition-all">98.5%</p>
           </div>
-          <div className="bg-gray-800 p-3 rounded-lg">
-            <p className="text-gray-400">Resource Usage</p>
-            <p className="text-xl font-bold">70%</p>
+          <div className="bg-gray-900 bg-opacity-70 p-4 rounded-lg border border-gray-700 hover:border-yellow-900 transition-all group">
+            <p className="text-gray-400 group-hover:text-gray-300 transition-colors">Resource Usage</p>
+            <p className="text-xl font-bold text-yellow-400 group-hover:text-yellow-300 group-hover:translate-y-[-2px] transition-all">70%</p>
           </div>
-          <div className="bg-gray-800 p-3 rounded-lg">
-            <p className="text-gray-400">Throughput</p>
-            <p className="text-xl font-bold">1000 TPS</p>
+          <div className="bg-gray-900 bg-opacity-70 p-4 rounded-lg border border-gray-700 hover:border-purple-900 transition-all group">
+            <p className="text-gray-400 group-hover:text-gray-300 transition-colors">Throughput</p>
+            <p className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent group-hover:translate-y-[-2px] transition-transform">1000 TPS</p>
           </div>
         </div>
       </div>
       
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-semibold">P2P Network Configuration</h3>
-          <div className="bg-blue-900 bg-opacity-40 px-3 py-1 rounded-full text-blue-400 text-sm">
+      <div className="mb-6 bg-gray-800 p-5 rounded-xl border border-gray-700 hover:border-cyan-800 transition-all hover:shadow-[0_0_15px_rgba(6,182,212,0.2)]">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-cyan-400">P2P Network Configuration</h3>
+          <div className="bg-gray-900 px-3 py-1 rounded-full text-cyan-400 text-sm border border-cyan-800 shadow-[0_0_5px_rgba(6,182,212,0.2)]">
             <span className="font-semibold">Optimal Peers: {optimalPeerConnections}</span>
           </div>
         </div>
         
-        <div className="bg-gray-700 p-4 rounded-lg">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-gray-900 bg-opacity-70 p-4 rounded-lg border border-gray-700">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <h4 className="text-sm font-semibold text-gray-300 mb-2">Network Configuration</h4>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Connection Type:</span>
-                  <span>Mesh Network</span>
+              <h4 className="text-sm font-semibold text-gray-300 mb-3">Network Configuration</h4>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center text-sm group">
+                  <span className="text-gray-400 group-hover:text-gray-300 transition-colors">Connection Type:</span>
+                  <span className="font-medium text-cyan-400 group-hover:text-cyan-300 transition-colors">Mesh Network</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Peer Discovery:</span>
-                  <span>Enabled (DHT)</span>
+                <div className="flex justify-between items-center text-sm group">
+                  <span className="text-gray-400 group-hover:text-gray-300 transition-colors">Peer Discovery:</span>
+                  <span className="font-medium text-cyan-400 group-hover:text-cyan-300 transition-colors">Enabled (DHT)</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Current Peers:</span>
-                  <span>{40 + Math.floor(Math.random() * 20)}</span>
+                <div className="flex justify-between items-center text-sm group">
+                  <span className="text-gray-400 group-hover:text-gray-300 transition-colors">Current Peers:</span>
+                  <span className="font-medium text-cyan-400 group-hover:text-cyan-300 transition-colors">{40 + Math.floor(Math.random() * 20)}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Block Propagation:</span>
-                  <span>1 second</span>
+                <div className="flex justify-between items-center text-sm group">
+                  <span className="text-gray-400 group-hover:text-gray-300 transition-colors">Block Propagation:</span>
+                  <span className="font-medium text-cyan-400 group-hover:text-cyan-300 transition-colors">1 second</span>
                 </div>
               </div>
             </div>
             
             <div>
-              <h4 className="text-sm font-semibold text-gray-300 mb-2">Network Adjustment</h4>
-              <div className="space-y-2">
+              <h4 className="text-sm font-semibold text-gray-300 mb-3">Network Adjustment</h4>
+              <div className="space-y-3">
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-400">Connection Strategy:</span>
-                  <span className={`px-2 py-1 rounded ${networkCongestion === "Low" ? "bg-green-900 text-green-400" : networkCongestion === "Medium" ? "bg-yellow-900 text-yellow-400" : "bg-red-900 text-red-400"}`}>
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    networkCongestion === "Low" ? "bg-gradient-to-r from-green-900 to-green-700 text-green-400 border border-green-700 shadow-[0_0_5px_rgba(16,185,129,0.3)]" 
+                    : networkCongestion === "Medium" ? "bg-gradient-to-r from-yellow-900 to-yellow-700 text-yellow-400 border border-yellow-700 shadow-[0_0_5px_rgba(245,158,11,0.3)]" 
+                    : "bg-gradient-to-r from-red-900 to-red-700 text-red-400 border border-red-700 shadow-[0_0_5px_rgba(239,68,68,0.3)]"
+                  }`}>
                     {networkCongestion === "Low" ? "Maximize" : networkCongestion === "Medium" ? "Balanced" : "Minimize"}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Block Size Adjustment:</span>
-                  <span className={`${blockSizeAdjustment >= 0 ? "text-green-400" : "text-red-400"}`}>
+                <div className="flex justify-between items-center text-sm group">
+                  <span className="text-gray-400 group-hover:text-gray-300 transition-colors">Block Size Adjustment:</span>
+                  <span className={`transition-colors font-medium ${
+                    blockSizeAdjustment >= 0 ? "text-green-400 group-hover:text-green-300" : "text-red-400 group-hover:text-red-300"
+                  }`}>
                     {blockSizeAdjustment >= 0 ? "+" : ""}{blockSizeAdjustment}%
                   </span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Propagation Hops:</span>
-                  <span>{networkCongestion === "Low" ? "4" : networkCongestion === "Medium" ? "3" : "2"}</span>
+                <div className="flex justify-between items-center text-sm group">
+                  <span className="text-gray-400 group-hover:text-gray-300 transition-colors">Propagation Hops:</span>
+                  <span className="font-medium text-purple-400 group-hover:text-purple-300 transition-colors">
+                    {networkCongestion === "Low" ? "4" : networkCongestion === "Medium" ? "3" : "2"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -1042,24 +1074,33 @@ function App() {
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold mb-2">Registered Nodes ({registeredNodes.length})</h3>
-        <div className="bg-gray-700 p-4 rounded-lg max-h-96 overflow-y-auto">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-purple-400">Registered Nodes</h3>
+          <div className="px-3 py-1 rounded-full bg-gray-900 text-xs text-purple-400 border border-purple-800 shadow-[0_0_5px_rgba(168,85,247,0.2)]">
+            Total: {registeredNodes.length}
+          </div>
+        </div>
+        <div className="bg-gray-800 p-5 rounded-xl border border-gray-700 hover:border-purple-800 transition-all hover:shadow-[0_0_15px_rgba(168,85,247,0.2)] max-h-96 overflow-y-auto">
           {registeredNodes.length > 0 ? (
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {registeredNodes.map((node, index) => (
-                <li
-                  key={index}
-                  className="flex items-center justify-between border-b border-gray-600 pb-2"
-                >
-                  <div className="truncate w-3/4">{node}</div>
-                  <span className="bg-green-900 text-green-400 text-xs px-2 py-1 rounded">
+                <li key={index} className="flex items-center justify-between border-b border-gray-700 pb-3 hover:border-purple-900 transition-colors group">
+                  <div className="truncate w-3/4 font-mono text-gray-300 group-hover:text-gray-100 transition-colors">{node}</div>
+                  <span className="bg-gradient-to-r from-green-900 to-green-700 text-green-400 text-xs px-3 py-1 rounded-full border border-green-700 shadow-[0_0_5px_rgba(16,185,129,0.3)] group-hover:shadow-[0_0_8px_rgba(16,185,129,0.5)] transition-all">
                     Active
                   </span>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-gray-400">No nodes registered yet.</p>
+            <div className="flex items-center justify-center h-32 bg-gray-900 bg-opacity-50 rounded-lg">
+              <div className="text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mx-auto text-gray-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <p className="text-gray-400">No nodes registered yet.</p>
+              </div>
+            </div>
           )}
         </div>
       </div>
@@ -1067,21 +1108,21 @@ function App() {
   );
 
   return (
-    <div className="bg-gray-900 text-white min-h-screen p-4">
+    <div className="bg-gradient-to-r from-gray-900 to-black text-white min-h-screen p-4 font-sans">
       <header className="container mx-auto flex flex-col md:flex-row justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-blue-400">Autonomous Traffic Manager</h1>
+        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]">Autonomous Traffic Manager</h1>
         {web3 ? (
           <div className="flex items-center gap-2 text-sm">
-            <div className="bg-green-800 px-3 py-1 rounded-full text-white border border-white">
-              Contract Address: {contractAddress.substring(0, 6)}...{contractAddress.substring(38)}
+            <div className="bg-gray-900 px-4 py-2 rounded-full text-cyan-400 border border-cyan-700 shadow-[0_0_10px_rgba(6,182,212,0.3)] hover:shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all">
+              Contract Address: {contractAddress}
             </div>
-            <div className="bg-blue-800 px-3 py-1 rounded-full text-white border border-white">
-              Connected: {account.substring(0, 6)}...{account.substring(38)}
+            <div className="bg-gray-900 px-4 py-2 rounded-full text-purple-400 border border-purple-700 shadow-[0_0_10px_rgba(168,85,247,0.3)] hover:shadow-[0_0_15px_rgba(168,85,247,0.5)] transition-all">
+              Connected: {account}
             </div>
           </div>
         ) : (
           <button
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
+            className="bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white font-bold py-2 px-6 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.5)] hover:shadow-[0_0_15px_rgba(6,182,212,0.7)] transition-all"
             onClick={connectMetaMask}
           >
             Connect MetaMask
@@ -1091,22 +1132,34 @@ function App() {
 
       {web3 ? (
         <div className="container mx-auto">
-          <div className="mb-6 bg-gray-800 rounded-lg p-1">
+          <div className="mb-6 bg-gray-900 bg-opacity-70 backdrop-blur-sm rounded-lg p-1 border border-gray-800 shadow-[0_0_10px_rgba(0,0,0,0.3)]">
             <div className="flex">
               <button
-                className={`flex-1 py-2 px-4 font-medium ${activeTab === 'dashboard' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300'}`}
+                className={`flex-1 py-3 px-4 font-medium rounded-lg transition-all ${
+                  activeTab === 'dashboard' 
+                    ? 'bg-gradient-to-r from-cyan-900 to-purple-900 text-white shadow-[0_0_8px_rgba(6,182,212,0.3)]' 
+                    : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                }`}
                 onClick={() => setActiveTab('dashboard')}
               >
                 Dashboard
               </button>
               <button
-                className={`flex-1 py-2 px-4 font-medium ${activeTab === 'gas' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300'}`}
+                className={`flex-1 py-3 px-4 font-medium rounded-lg mx-1 transition-all ${
+                  activeTab === 'gas' 
+                    ? 'bg-gradient-to-r from-cyan-900 to-purple-900 text-white shadow-[0_0_8px_rgba(6,182,212,0.3)]' 
+                    : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                }`}
                 onClick={() => setActiveTab('gas')}
               >
                 Gas Management
               </button>
               <button
-                className={`flex-1 py-2 px-4 font-medium ${activeTab === 'nodes' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300'}`}
+                className={`flex-1 py-3 px-4 font-medium rounded-lg transition-all ${
+                  activeTab === 'nodes' 
+                    ? 'bg-gradient-to-r from-cyan-900 to-purple-900 text-white shadow-[0_0_8px_rgba(6,182,212,0.3)]' 
+                    : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                }`}
                 onClick={() => setActiveTab('nodes')}
               >
                 Node Management
@@ -1119,7 +1172,12 @@ function App() {
           {activeTab === 'nodes' && renderNodeManagement()}
         </div>
       ) : (
-        <p>Loading...</p>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-center">
+            <div className="inline-block border-t-4 border-l-4 border-cyan-500 w-12 h-12 rounded-full animate-spin mb-4"></div>
+            <p className="text-cyan-400">Connecting to blockchain...</p>
+          </div>
+        </div>
       )}
     </div>
   );
