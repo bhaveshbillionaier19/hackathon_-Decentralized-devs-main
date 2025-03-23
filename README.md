@@ -7,7 +7,7 @@ The **Autonomous Traffic Manager for Blockchain Networks** is a decentralized sy
 - **AI**: PyTorch, TensorFlow (Reinforcement Learning models)
 - **Blockchain**: Solidity, Hardhat, Ethereum
 - **eBPF**: bcc, libbpf, Cilium (for efficient traffic filtering & load balancing)
-- **Frontend**: React.js
+- **Frontend**: React.js,Tailwind CSS(for styling)
 - **Backend**: Flask(API)
 
 ---
