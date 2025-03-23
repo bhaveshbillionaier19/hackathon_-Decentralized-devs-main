@@ -18,7 +18,8 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 function App() {
   const [web3, setWeb3] = useState(null);
   const [account, setAccount] = useState("");
-  const [contract, setContract] = useState(null);
+  const [trafficManager, setTrafficManager] = useState(null);
+  const [networkManager, setNetworkManager] = useState(null);
   const [gasLimit, setGasLimit] = useState("");
   const [maxGasLimit, setMaxGasLimit] = useState("");
   const [networkCongestion, setNetworkCongestion] = useState("Medium");
@@ -37,7 +38,6 @@ function App() {
     fast: { fee: "0", time: "< 30 sec" },
   });
   const [blockUtilization, setBlockUtilization] = useState("0");
-  // New state variables for enhanced blockchain optimizations
   const [optimalPeerConnections, setOptimalPeerConnections] = useState(50);
   const [blockSizeAdjustment, setBlockSizeAdjustment] = useState(0);
   const [recommendations, setRecommendations] = useState([]);
@@ -50,174 +50,428 @@ function App() {
   const [trafficRules, setTrafficRules] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [nodes, setNodes] = useState([]);
+  const [nodeMetrics, setNodeMetrics] = useState({});
+  const [optimalPeerCount, setOptimalPeerCount] = useState(50);
+  
+  // New state variables for network parameters
+  const [mempoolMaxSize, setMempoolMaxSize] = useState(10000);
+  const [minGasPrice, setMinGasPrice] = useState(web3?.utils.toWei("1", "gwei") || "0");
+  const [maxTxPerAccount, setMaxTxPerAccount] = useState(20);
+  
+  // Block space allocation state
+  const [txType, setTxType] = useState("");
+  const [spaceAllocation, setSpaceAllocation] = useState(0);
+  const [blockSpaceAllocations, setBlockSpaceAllocations] = useState([]);
+  
+  // Priority contracts state
+  const [priorityContracts, setPriorityContracts] = useState([]);
+  const [newPriorityContract, setNewPriorityContract] = useState({
+    address: "",
+    level: 1
+  });
 
-  // Contract ABI (Ensure this matches your deployed contract)
-  const contractABI = [
+  // Contract addresses
+  const trafficManagerAddress = "0x3d935d03f16c8286c9335e5ac170ce58bffcd1bb";
+  const networkManagerAddress = "0x67ed917580db71487fe561a0fd9934df1575edee"; // Replace with actual address
+
+  // Contract ABIs
+  const trafficManagerABI = [
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: "uint256",
-          name: "_initialGasLimit",
-          type: "uint256",
+          "internalType": "uint256",
+          "name": "_initialGasLimit",
+          "type": "uint256"
         },
         {
-          internalType: "uint256",
-          name: "_maxGasLimit",
-          type: "uint256",
-        },
+          "internalType": "uint256",
+          "name": "_maxGasLimit",
+          "type": "uint256"
+        }
       ],
-      stateMutability: "nonpayable",
-      type: "constructor",
+      "stateMutability": "nonpayable",
+      "type": "constructor"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: false,
-          internalType: "uint256",
-          name: "newLimit",
-          type: "uint256",
-        },
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newLimit",
+          "type": "uint256"
+        }
       ],
-      name: "GasLimitUpdated",
-      type: "event",
+      "name": "GasLimitUpdated",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: false,
-          internalType: "address",
-          name: "nodeAddress",
-          type: "address",
-        },
+          "indexed": false,
+          "internalType": "address",
+          "name": "nodeAddress",
+          "type": "address"
+        }
       ],
-      name: "NodeRegistered",
-      type: "event",
+      "name": "NodeRegistered",
+      "type": "event"
     },
     {
-      inputs: [],
-      name: "currentGasLimit",
-      outputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          internalType: "uint256",
-          name: "",
-          type: "uint256",
-        },
+          "indexed": false,
+          "internalType": "address",
+          "name": "nodeAddress",
+          "type": "address"
+        }
       ],
-      stateMutability: "view",
-      type: "function",
+      "name": "NodeDeactivated",
+      "type": "event"
     },
     {
-      inputs: [],
-      name: "getRegisteredNodes",
-      outputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          internalType: "address[]",
-          name: "",
-          type: "address[]",
+          "indexed": false,
+          "internalType": "address",
+          "name": "nodeAddress",
+          "type": "address"
         },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        }
       ],
-      stateMutability: "view",
-      type: "function",
+      "name": "NodeHeartbeat",
+      "type": "event"
     },
     {
-      inputs: [],
-      name: "maxGasLimit",
-      outputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          internalType: "uint256",
-          name: "",
-          type: "uint256",
+          "indexed": false,
+          "internalType": "string",
+          "name": "txType",
+          "type": "string"
         },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "percentage",
+          "type": "uint256"
+        }
       ],
-      stateMutability: "view",
-      type: "function",
+      "name": "BlockSpaceAdjusted",
+      "type": "event"
     },
     {
-      inputs: [
+      "inputs": [],
+      "name": "currentGasLimit",
+      "outputs": [
         {
-          internalType: "address",
-          name: "",
-          type: "address",
-        },
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
       ],
-      name: "nodes",
-      outputs: [
-        {
-          internalType: "address",
-          name: "nodeAddress",
-          type: "address",
-        },
-        {
-          internalType: "bool",
-          name: "isActive",
-          type: "bool",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: "owner",
-      outputs: [
+      "inputs": [],
+      "name": "maxGasLimit",
+      "outputs": [
         {
-          internalType: "address",
-          name: "",
-          type: "address",
-        },
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
       ],
-      stateMutability: "view",
-      type: "function",
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: "address",
-          name: "nodeAddress",
-          type: "address",
-        },
+          "internalType": "uint256",
+          "name": "newLimit",
+          "type": "uint256"
+        }
       ],
-      name: "registerNode",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
+      "name": "setGasLimit",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: "uint256",
-          name: "",
-          type: "uint256",
-        },
+          "internalType": "uint256",
+          "name": "newMaxLimit",
+          "type": "uint256"
+        }
       ],
-      name: "registeredNodes",
-      outputs: [
-        {
-          internalType: "address",
-          name: "",
-          type: "address",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
+      "name": "setMaxGasLimit",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: "uint256",
-          name: "newLimit",
-          type: "uint256",
-        },
+          "internalType": "address",
+          "name": "nodeAddress",
+          "type": "address"
+        }
       ],
-      name: "setGasLimit",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
+      "name": "registerNode",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "nodeAddress",
+          "type": "address"
+        }
+      ],
+      "name": "deactivateNode",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "computingPower",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "bandwidth",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "latency",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateNodeMetrics",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "sendHeartbeat",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getRegisteredNodes",
+      "outputs": [
+        {
+          "internalType": "address[]",
+          "name": "",
+          "type": "address[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "contractAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "priorityLevel",
+          "type": "uint256"
+        }
+      ],
+      "name": "addPriorityContract",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "txType",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "percentage",
+          "type": "uint256"
+        }
+      ],
+      "name": "setBlockSpaceAllocation",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "int256",
+          "name": "_blockSizeAdjustment",
+          "type": "int256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_mempoolMaxSize",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_optimalPeerCount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_minGasPrice",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_maxTxPerAccount",
+          "type": "uint256"
+        }
+      ],
+      "name": "setNetworkParameters",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
   ];
+  const networkManagerABI = [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_initialGasLimit",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_maxGasLimit",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "currentGasLimit",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "maxGasLimit",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "nodeAddress",
+          "type": "address"
+        }
+      ],
+      "name": "registerNode",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "nodeAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "latency",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "uptime",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "resourceUsage",
+          "type": "uint256"
+        }
+      ],
+      "name": "evaluateNode",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "nodes",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "isActive",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint256",
+          "name": "latency",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "uptime",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "resourceUsage",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ];
+<<<<<<< HEAD
+=======
   const contractAddress = "0x71e102A49e672B9cB1AfD1606368F470b2A4DDCA";
+>>>>>>> eee054a2c2fd5944f75c8b180b894c7d05ebdcb2
 
   // Connect to MetaMask
   const connectMetaMask = async () => {
@@ -228,9 +482,19 @@ function App() {
         const accounts = await web3Instance.eth.getAccounts();
         setWeb3(web3Instance);
         setAccount(accounts[0]);
+<<<<<<< HEAD
+
+        // Initialize both contracts
+        const trafficManagerInstance = new web3Instance.eth.Contract(trafficManagerABI, trafficManagerAddress);
+        const networkManagerInstance = new web3Instance.eth.Contract(networkManagerABI, networkManagerAddress);
+        
+        setTrafficManager(trafficManagerInstance);
+        setNetworkManager(networkManagerInstance);
+=======
         // Initialize contract
         const contractInstance = new web3Instance.eth.Contract(contractABI, contractAddress);
         setContract(contractInstance);
+>>>>>>> eee054a2c2fd5944f75c8b180b894c7d05ebdcb2
       } catch (error) {
         console.error("Error connecting to MetaMask:", error);
       }
@@ -241,19 +505,46 @@ function App() {
 
   // Fetch blockchain data
   const fetchBlockchainData = async () => {
-    if (web3 && contract) {
+    if (web3 && trafficManager && networkManager) {
       try {
-        // Fetch current gas limit
-        const limit = await contract.methods.currentGasLimit().call();
+        // Fetch data from TrafficManager
+        const limit = await trafficManager.methods.currentGasLimit().call();
         setGasLimit(limit);
 
-        // Fetch max gas limit
-        const maxLimit = await contract.methods.maxGasLimit().call();
+        const maxLimit = await trafficManager.methods.maxGasLimit().call();
         setMaxGasLimit(maxLimit);
 
-        // Get registered nodes
-        const nodes = await contract.methods.getRegisteredNodes().call();
+        const nodes = await trafficManager.methods.getRegisteredNodes().call();
         setRegisteredNodes(nodes);
+
+        // Fetch node metrics for each registered node with error handling
+        const nodeMetricsPromises = nodes.map(async (nodeAddress) => {
+          try {
+            const nodeData = await networkManager.methods.nodes(nodeAddress).call();
+            return {
+              address: nodeAddress,
+              isActive: nodeData.isActive,
+              latency: nodeData.latency,
+              uptime: nodeData.uptime,
+              resourceUsage: nodeData.resourceUsage
+            };
+          } catch (error) {
+            console.warn(`Failed to fetch metrics for node ${nodeAddress}:`, error);
+            return {
+              address: nodeAddress,
+              isActive: true,
+              latency: 0,
+              uptime: 0,
+              resourceUsage: 0
+            };
+          }
+        });
+
+        // Wait for all node metrics to be fetched
+        const nodeMetrics = await Promise.all(nodeMetricsPromises);
+
+        // Update node metrics in state
+        setNodes(nodeMetrics);
 
         // Get current block
         const blockNumber = await web3.eth.getBlockNumber();
@@ -371,15 +662,52 @@ function App() {
 
   // Update gas limit
   const updateGasLimit = async () => {
-    if (contract && newGasLimit) {
+    if (trafficManager && newGasLimit) {
       try {
-        const limit = parseInt(newGasLimit);
-        await contract.methods.setGasLimit(limit).send({ from: account });
+        // Convert string to BigInt
+        /* eslint-disable no-undef */
+        const limit = BigInt(newGasLimit);
+        
+        // Get the current max gas limit for validation
+        const currentMaxLimit = BigInt(await trafficManager.methods.maxGasLimit().call());
+        /* eslint-enable no-undef */
+        
+        // Validate the new gas limit using BigInt comparison
+        if (limit > currentMaxLimit) {
+          alert(`Gas limit cannot exceed the maximum limit of ${currentMaxLimit.toString()}`);
+          return;
+        }
+
+        // Estimate gas for the transaction
+        const gasEstimate = await trafficManager.methods.setGasLimit(limit.toString()).estimateGas({ 
+          from: account 
+        });
+        
+        // Add 20% buffer to gas estimate
+        const gasLimit = Math.ceil(Number(gasEstimate) * 1.2);
+
+        // Send the transaction
+        await trafficManager.methods.setGasLimit(limit.toString()).send({ 
+          from: account,
+          gas: gasLimit
+        });
+
         alert("Gas limit updated successfully!");
         fetchBlockchainData();
         setNewGasLimit("");
       } catch (error) {
         console.error("Error updating gas limit:", error);
+        
+        // More user-friendly error messages
+        if (error.message.includes("caller is not the owner")) {
+          alert("Error: You don't have permission to update the gas limit");
+        } else if (error.message.includes("gas limit too high")) {
+          alert("Error: The gas limit value is too high");
+        } else if (error.message.includes("gas limit too low")) {
+          alert("Error: The gas limit value is too low");
+        } else {
+          alert("Error updating gas limit. Please check the console for details.");
+        }
       }
     } else {
       alert("Please enter a valid gas limit");
@@ -398,11 +726,19 @@ function App() {
         throughput: 800 + Math.random() * 500   // 800-1300 TPS (more variance)
       };
       
+<<<<<<< HEAD
+      let useBackupLogic = true;
+=======
       // Include connection timeout for more reliable API calls
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 5 second timeout
+>>>>>>> eee054a2c2fd5944f75c8b180b894c7d05ebdcb2
       
       try {
+        // Include connection timeout for more reliable API calls
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+        
         const response = await fetch("http://127.0.0.1:5000/predict_gas", {
           method: "POST",
           headers: {
@@ -422,6 +758,7 @@ function App() {
         console.log("AI Optimization results:", result);
         
         if (result.success) {
+          useBackupLogic = false;
           // Extract all optimization parameters
           const optimization = result.optimization;
           
@@ -448,9 +785,6 @@ function App() {
             setTps(optimization.metrics.tps);
           }
           
-          // Fetch eBPF traffic rules
-          fetchTrafficRules();
-          
           // Add gas limit to history for the chart
           setGasHistory(prev => {
             const newHistory = [...prev, optimization.current_gas_limit];
@@ -461,8 +795,11 @@ function App() {
           });
         }
       } catch (apiError) {
-        console.error("API Connection Error:", apiError);
-        
+        console.warn("API Connection Error - Using fallback logic:", apiError);
+        useBackupLogic = true;
+      }
+      
+      if (useBackupLogic) {
         // Generate fallback data if API is unreachable
         // This helps the dashboard continue to be dynamic even if the backend is down
         
@@ -499,6 +836,16 @@ function App() {
             time: networkState === "High" ? "1-3 min" : networkState === "Low" ? "<30 sec" : "30-60 sec"
           }
         });
+        
+        // Generate fallback recommendations
+        setRecommendations([
+          "Using fallback optimization mode due to AI service unavailability",
+          networkState === "High" ? "Consider increasing block gas limit to handle high demand" : 
+          networkState === "Low" ? "Network is underutilized, current parameters are optimal" :
+          "Network load is balanced, monitoring for changes",
+          `Current peer count (${optimalPeerConnections}) is within acceptable range`,
+          `Block utilization at ${blockUtilization}% suggests ${networkState.toLowerCase()} network load`
+        ]);
         
         // Add gas limit to history for the chart
         setGasHistory(prev => {
@@ -543,10 +890,13 @@ function App() {
   
   // Register a new node
   const registerNode = async () => {
-    if (contract && web3.utils.isAddress(newNodeAddress)) {
+    if (trafficManager && networkManager && web3.utils.isAddress(newNodeAddress)) {
       try {
-        await contract.methods.registerNode(newNodeAddress).send({ from: account });
-        alert("Node registered successfully!");
+        // Register in both contracts
+        await trafficManager.methods.registerNode(newNodeAddress).send({ from: account });
+        await networkManager.methods.registerNode(newNodeAddress).send({ from: account });
+        
+        alert("Node registered successfully in both contracts!");
         fetchBlockchainData();
         setNewNodeAddress("");
       } catch (error) {
@@ -559,7 +909,7 @@ function App() {
 
   // Set up polling for blockchain data
   useEffect(() => {
-    if (web3 && contract) {
+    if (web3 && trafficManager && networkManager) {
       fetchBlockchainData();
       fetchGasLimit(); // Fetch AI predictions initially
 
@@ -571,7 +921,7 @@ function App() {
 
       return () => clearInterval(interval);
     }
-  }, [web3, contract]);
+  }, [web3, trafficManager, networkManager]);
 
   // Also add a separate effect to fetch AI predictions on initial load
   useEffect(() => {
@@ -623,6 +973,88 @@ function App() {
       },
     },
   };
+
+  // Add priority contract
+  const addPriorityContract = async (contractAddress, priorityLevel) => {
+    if (trafficManager && web3.utils.isAddress(contractAddress)) {
+      try {
+        await trafficManager.methods.addPriorityContract(contractAddress, priorityLevel)
+          .send({ from: account });
+        alert("Priority contract added successfully!");
+        fetchBlockchainData();
+      } catch (error) {
+        console.error("Error adding priority contract:", error);
+      }
+    }
+  };
+
+  // Set block space allocation
+  const setBlockSpaceAllocation = async (txType, percentage) => {
+    if (trafficManager) {
+      try {
+        await trafficManager.methods.setBlockSpaceAllocation(txType, percentage)
+          .send({ from: account });
+        alert("Block space allocation updated successfully!");
+        fetchBlockchainData();
+      } catch (error) {
+        console.error("Error setting block space allocation:", error);
+      }
+    }
+  };
+
+  // Set network parameters
+  const setNetworkParameters = async (blockSizeAdjustment, mempoolMaxSize, optimalPeerCount, minGasPrice, maxTxPerAccount) => {
+    if (trafficManager) {
+      try {
+        await trafficManager.methods.setNetworkParameters(
+          blockSizeAdjustment,
+          mempoolMaxSize,
+          optimalPeerCount,
+          minGasPrice,
+          maxTxPerAccount
+        ).send({ from: account });
+        alert("Network parameters updated successfully!");
+        fetchBlockchainData();
+      } catch (error) {
+        console.error("Error setting network parameters:", error);
+      }
+    }
+  };
+
+  // Send node heartbeat
+  const sendHeartbeat = async () => {
+    if (trafficManager) {
+      try {
+        await trafficManager.methods.sendHeartbeat().send({ from: account });
+        console.log("Heartbeat sent successfully");
+      } catch (error) {
+        console.error("Error sending heartbeat:", error);
+      }
+    }
+  };
+
+  // Update node metrics
+  const updateNodeMetrics = async (computingPower, bandwidth, latency) => {
+    if (trafficManager) {
+      try {
+        await trafficManager.methods.updateNodeMetrics(computingPower, bandwidth, latency)
+          .send({ from: account });
+        alert("Node metrics updated successfully!");
+        fetchBlockchainData();
+      } catch (error) {
+        console.error("Error updating node metrics:", error);
+      }
+    }
+  };
+
+  // Set up heartbeat interval
+  useEffect(() => {
+    if (trafficManager && account) {
+      // Send heartbeat every 30 seconds
+      const heartbeatInterval = setInterval(sendHeartbeat, 30000);
+      return () => clearInterval(heartbeatInterval);
+    }
+  }, [trafficManager, account]);
 
   // Render dashboard tab
   const renderDashboard = () => (
@@ -890,6 +1322,88 @@ function App() {
         </div>
       </div>
       
+<<<<<<< HEAD
+      <div className="mt-6 bg-gray-700 p-4 rounded-lg">
+        <h3 className="text-lg font-semibold mb-4">Network Parameters</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-400">Block Size Adjustment (%)</label>
+            <input
+              type="number"
+              className="mt-1 w-full bg-gray-600 border border-gray-500 rounded p-2"
+              placeholder="-10 to 10"
+              min="-10"
+              max="10"
+              onChange={(e) => setBlockSizeAdjustment(parseInt(e.target.value))}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-400">Mempool Max Size</label>
+            <input
+              type="number"
+              className="mt-1 w-full bg-gray-600 border border-gray-500 rounded p-2"
+              placeholder="Number of transactions"
+              min="1000"
+              onChange={(e) => setMempoolMaxSize(parseInt(e.target.value))}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-400">Optimal Peer Count</label>
+            <input
+              type="number"
+              className="mt-1 w-full bg-gray-600 border border-gray-500 rounded p-2"
+              placeholder="Number of peers"
+              min="10"
+              onChange={(e) => setOptimalPeerCount(parseInt(e.target.value))}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-400">Minimum Gas Price (Gwei)</label>
+            <input
+              type="number"
+              className="mt-1 w-full bg-gray-600 border border-gray-500 rounded p-2"
+              placeholder="Gas price in Gwei"
+              min="1"
+              onChange={(e) => setMinGasPrice(web3.utils.toWei(e.target.value, 'gwei'))}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-400">Max TX per Account</label>
+            <input
+              type="number"
+              className="mt-1 w-full bg-gray-600 border border-gray-500 rounded p-2"
+              placeholder="Max transactions"
+              min="1"
+              onChange={(e) => setMaxTxPerAccount(parseInt(e.target.value))}
+            />
+          </div>
+        </div>
+        <button
+          className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full"
+          onClick={() => setNetworkParameters(
+            blockSizeAdjustment,
+            mempoolMaxSize,
+            optimalPeerCount,
+            minGasPrice,
+            maxTxPerAccount
+          )}
+        >
+          Update Network Parameters
+        </button>
+      </div>
+
+      <div className="mt-6 bg-gray-700 p-4 rounded-lg">
+        <h3 className="text-lg font-semibold mb-4">Block Space Allocation</h3>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-400">Transaction Type</label>
+            <input
+              type="text"
+              className="mt-1 w-full bg-gray-600 border border-gray-500 rounded p-2"
+              placeholder="e.g., swap, transfer, mint"
+              onChange={(e) => setTxType(e.target.value)}
+            />
+=======
       <div className="bg-gray-800 p-5 rounded-xl border border-gray-700 hover:border-purple-800 transition-all hover:shadow-[0_0_15px_rgba(168,85,247,0.2)]">
         <h3 className="text-lg font-semibold mb-4 text-purple-400">eBPF Traffic Control Rules</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -951,7 +1465,25 @@ function App() {
                 <p className="text-sm text-gray-400">No transaction dropping rules active</p>
               </div>
             )}
+>>>>>>> eee054a2c2fd5944f75c8b180b894c7d05ebdcb2
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-400">Space Allocation (%)</label>
+            <input
+              type="number"
+              className="mt-1 w-full bg-gray-600 border border-gray-500 rounded p-2"
+              placeholder="0-100"
+              min="0"
+              max="100"
+              onChange={(e) => setSpaceAllocation(parseInt(e.target.value))}
+            />
+          </div>
+          <button
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full"
+            onClick={() => setBlockSpaceAllocation(txType, spaceAllocation)}
+          >
+            Set Block Space Allocation
+          </button>
         </div>
       </div>
     </div>
@@ -1073,6 +1605,62 @@ function App() {
         </div>
       </div>
 
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold mb-2">Update Node Metrics</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {registeredNodes.map((node, index) => (
+            <div key={index} className="bg-gray-700 p-4 rounded-lg">
+              <p className="text-sm mb-2">Node: {node.substring(0, 8)}...</p>
+              <div className="space-y-2">
+                <input
+                  type="number"
+                  placeholder="Latency (ms)"
+                  className="w-full bg-gray-600 border border-gray-500 rounded p-2"
+                  onChange={(e) => setNodeMetrics(prev => ({
+                    ...prev,
+                    [node]: { ...prev[node], latency: e.target.value }
+                  }))}
+                />
+                <input
+                  type="number"
+                  placeholder="Uptime (%)"
+                  className="w-full bg-gray-600 border border-gray-500 rounded p-2"
+                  onChange={(e) => setNodeMetrics(prev => ({
+                    ...prev,
+                    [node]: { ...prev[node], uptime: e.target.value }
+                  }))}
+                />
+                <input
+                  type="number"
+                  placeholder="Resource Usage (%)"
+                  className="w-full bg-gray-600 border border-gray-500 rounded p-2"
+                  onChange={(e) => setNodeMetrics(prev => ({
+                    ...prev,
+                    [node]: { ...prev[node], resourceUsage: e.target.value }
+                  }))}
+                />
+                <button
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={() => {
+                    const metrics = nodeMetrics[node];
+                    if (metrics) {
+                      evaluateNode(
+                        node,
+                        parseInt(metrics.latency),
+                        parseInt(metrics.uptime),
+                        parseInt(metrics.resourceUsage)
+                      );
+                    }
+                  }}
+                >
+                  Update Metrics
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-purple-400">Registered Nodes</h3>
@@ -1107,14 +1695,35 @@ function App() {
     </div>
   );
 
+  // Evaluate node performance
+  const evaluateNode = async (nodeAddress, latency, uptime, resourceUsage) => {
+    if (networkManager && web3.utils.isAddress(nodeAddress)) {
+      try {
+        await networkManager.methods.evaluateNode(nodeAddress, latency, uptime, resourceUsage)
+          .send({ from: account });
+        alert("Node evaluation updated successfully!");
+        fetchBlockchainData();
+      } catch (error) {
+        console.error("Error evaluating node:", error);
+      }
+    } else {
+      alert("Please enter a valid Ethereum address");
+    }
+  };
+
   return (
     <div className="bg-gradient-to-r from-gray-900 to-black text-white min-h-screen p-4 font-sans">
       <header className="container mx-auto flex flex-col md:flex-row justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]">Autonomous Traffic Manager</h1>
         {web3 ? (
           <div className="flex items-center gap-2 text-sm">
+<<<<<<< HEAD
+            <div className="bg-green-800 px-3 py-1 rounded-full text-white border border-white">
+              Contract Address: {trafficManagerAddress.substring(0, 6)}...{trafficManagerAddress.substring(38)}
+=======
             <div className="bg-gray-900 px-4 py-2 rounded-full text-cyan-400 border border-cyan-700 shadow-[0_0_10px_rgba(6,182,212,0.3)] hover:shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all">
               Contract Address: {contractAddress}
+>>>>>>> eee054a2c2fd5944f75c8b180b894c7d05ebdcb2
             </div>
             <div className="bg-gray-900 px-4 py-2 rounded-full text-purple-400 border border-purple-700 shadow-[0_0_10px_rgba(168,85,247,0.3)] hover:shadow-[0_0_15px_rgba(168,85,247,0.5)] transition-all">
               Connected: {account}
